@@ -72,48 +72,45 @@
         <p class="text-gray-500">Tidak ada data absensi</p>
       </div>
       
-      <div v-else class="overflow-x-auto">
+      <div v-else class="overflow-x-auto -mx-6 px-6">
         <table class="w-full">
           <thead>
-            <tr class="border-b border-gray-200">
-              <th class="text-left py-3 px-4 text-sm font-medium text-gray-500">Tanggal</th>
-              <th class="text-left py-3 px-4 text-sm font-medium text-gray-500">Nama</th>
-              <th class="text-left py-3 px-4 text-sm font-medium text-gray-500">Check In</th>
-              <th class="text-left py-3 px-4 text-sm font-medium text-gray-500">Check Out</th>
-              <th class="text-left py-3 px-4 text-sm font-medium text-gray-500">Durasi</th>
-              <th class="text-left py-3 px-4 text-sm font-medium text-gray-500">Status</th>
+            <tr class="border-b border-gray-200 text-left text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+              <th class="py-3 px-4">Tanggal</th>
+              <th class="py-3 px-4">Nama</th>
+              <th class="py-3 px-4">Check In</th>
+              <th class="hidden md:table-cell py-3 px-4">Check Out</th>
+              <th class="hidden lg:table-cell py-3 px-4">Durasi</th>
+              <th class="py-3 px-4 text-right">Status</th>
             </tr>
           </thead>
           <tbody>
             <tr
               v-for="record in attendanceData"
               :key="record._id"
-              class="border-b border-gray-100 hover:bg-gray-50"
+              class="border-b border-gray-100 hover:bg-gray-50 transition-colors"
             >
-              <td class="py-3 px-4">
-                <p class="font-medium text-gray-900">{{ formatDate(record.date) }}</p>
-                <p class="text-xs text-gray-500">{{ getDayName(record.date) }}</p>
+              <td class="py-4 px-4 whitespace-nowrap">
+                <p class="font-bold text-gray-900 text-xs">{{ formatDate(record.date) }}</p>
+                <p class="text-[9px] text-gray-400 uppercase tracking-tighter">{{ getDayName(record.date) }}</p>
               </td>
-              <td class="py-3 px-4 text-sm text-gray-900">{{ record.userName || 'Unknown' }}</td>
-              <td class="py-3 px-4">
-                <p class="text-sm text-gray-900">{{ formatTime(record.checkIn?.time) }}</p>
-                <p v-if="record.checkIn?.location" class="text-xs text-gray-500">
-                  {{ record.checkIn.location.latitude.toFixed(4) }}, {{ record.checkIn.location.longitude.toFixed(4) }}
-                </p>
+              <td class="py-4 px-4">
+                <p class="text-xs font-semibold text-gray-900 truncate max-w-[100px]">{{ record.userName || 'Unknown' }}</p>
               </td>
-              <td class="py-3 px-4">
-                <p class="text-sm text-gray-900">{{ formatTime(record.checkOut?.time) }}</p>
-                <p v-if="record.checkOut?.location" class="text-xs text-gray-500">
-                  {{ record.checkOut.location.latitude.toFixed(4) }}, {{ record.checkOut.location.longitude.toFixed(4) }}
-                </p>
+              <td class="py-4 px-4 whitespace-nowrap">
+                <p class="text-xs font-bold text-gray-900">{{ formatTime(record.checkIn?.time) }}</p>
+                <p class="md:hidden text-[9px] text-gray-400 uppercase tracking-tighter">Out: {{ formatTime(record.checkOut?.time) || '-' }}</p>
               </td>
-              <td class="py-3 px-4 text-sm text-gray-600">
+              <td class="hidden md:table-cell py-4 px-4 text-xs text-gray-900 font-medium">
+                {{ formatTime(record.checkOut?.time) || '-' }}
+              </td>
+              <td class="hidden lg:table-cell py-4 px-4 text-xs text-gray-600">
                 {{ record.checkIn && record.checkOut ? formatDuration(record.checkIn.time, record.checkOut.time) : '-' }}
               </td>
-              <td class="py-3 px-4">
+              <td class="py-4 px-4 text-right whitespace-nowrap">
                 <span
                   :class="[
-                    'px-2 py-1 rounded-full text-xs font-medium',
+                    'px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-tighter',
                     getStatusClass(record)
                   ]"
                 >

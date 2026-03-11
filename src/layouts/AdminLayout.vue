@@ -64,7 +64,7 @@
         @click="isSidebarOpen = false"
       />
       
-      <main class="flex-1 p-4 sm:p-6 lg:p-8 lg:ml-0">
+      <main class="flex-1 p-4 sm:p-6 lg:ml-0 overflow-x-hidden">
         <router-view />
       </main>
     </div>
@@ -72,12 +72,27 @@
 </template>
 
 <script setup>
-import { ref, h } from 'vue'
+import { ref, h, onMounted, onUnmounted } from 'vue'
 import { useRoute } from 'vue-router'
 import Navbar from '@/components/Navbar.vue'
 
 const route = useRoute()
 const isSidebarOpen = ref(false)
+
+// Close sidebar on window resize if widening
+const handleResize = () => {
+  if (window.innerWidth >= 1024 && isSidebarOpen.value) {
+    isSidebarOpen.value = false
+  }
+}
+
+onMounted(() => {
+  window.addEventListener('resize', handleResize)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('resize', handleResize)
+})
 
 const DashboardIcon = {
   render: () => h('svg', { fill: 'none', stroke: 'currentColor', viewBox: '0 0 24 24' }, [

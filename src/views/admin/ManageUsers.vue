@@ -42,77 +42,79 @@
         <p class="text-gray-500">Tidak ada data karyawan</p>
       </div>
       
-      <div v-else class="overflow-x-auto">
+      <div v-else class="overflow-x-auto -mx-6 px-6">
         <table class="w-full">
           <thead>
             <tr class="border-b border-gray-200">
-              <th class="text-left py-3 px-4 text-sm font-medium text-gray-500">Nama</th>
-              <th class="text-left py-3 px-4 text-sm font-medium text-gray-500">Email</th>
-              <th class="text-left py-3 px-4 text-sm font-medium text-gray-500">Departemen</th>
-              <th class="text-left py-3 px-4 text-sm font-medium text-gray-500">Role</th>
-              <th class="text-left py-3 px-4 text-sm font-medium text-gray-500">Status</th>
-              <th class="text-right py-3 px-4 text-sm font-medium text-gray-500">Aksi</th>
+              <th class="text-left py-3 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Nama</th>
+              <th class="hidden md:table-cell text-left py-3 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Email</th>
+              <th class="hidden lg:table-cell text-left py-3 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Departemen</th>
+              <th class="text-left py-3 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Role</th>
+              <th class="hidden sm:table-cell text-left py-3 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
+              <th class="text-right py-3 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Aksi</th>
             </tr>
           </thead>
           <tbody>
             <tr
               v-for="user in filteredUsers"
               :key="user._id"
-              class="border-b border-gray-100 hover:bg-gray-50"
+              class="border-b border-gray-100 hover:bg-gray-50 transition-colors"
             >
-              <td class="py-3 px-4">
+              <td class="py-4 px-4 whitespace-nowrap">
                 <div class="flex items-center">
-                  <div class="w-10 h-10 bg-primary-100 rounded-full flex items-center justify-center mr-3">
-                    <span class="text-primary-700 font-medium text-sm">
+                  <div class="w-9 h-9 bg-primary-100 rounded-full flex items-center justify-center mr-3 shrink-0">
+                    <span class="text-primary-700 font-bold text-xs">
                       {{ getInitials(user.name) }}
                     </span>
                   </div>
-                  <span class="font-medium text-gray-900">{{ user.name }}</span>
+                  <div>
+                    <p class="font-medium text-gray-900 text-sm leading-none">{{ user.name }}</p>
+                    <p class="md:hidden text-[10px] text-gray-500 mt-1">{{ user.email }}</p>
+                  </div>
                 </div>
               </td>
-              <td class="py-3 px-4 text-sm text-gray-600">{{ user.email }}</td>
-              <td class="py-3 px-4 text-sm text-gray-600">{{ user.department || '-' }}</td>
-              <td class="py-3 px-4">
+              <td class="hidden md:table-cell py-4 px-4 text-sm text-gray-600 truncate max-w-[150px]">{{ user.email }}</td>
+              <td class="hidden lg:table-cell py-4 px-4 text-sm text-gray-600 capitalize">{{ user.department || '-' }}</td>
+              <td class="py-4 px-4">
                 <span
                   :class="[
-                    'px-2 py-1 rounded-full text-xs font-medium capitalize',
-                    user.role === 'admin' ? 'bg-purple-100 text-purple-800' : 'bg-blue-100 text-blue-800'
+                    'px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider',
+                    user.role === 'admin' ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700'
                   ]"
                 >
                   {{ user.role }}
                 </span>
               </td>
-              <td class="py-3 px-4">
+              <td class="hidden sm:table-cell py-4 px-4">
                 <span
                   :class="[
-                    'px-2 py-1 rounded-full text-xs font-medium',
-                    user.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                    'px-2 py-0.5 rounded-full text-[10px] font-bold uppercase',
+                    user.isActive ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
                   ]"
                 >
-                  {{ user.isActive ? 'Aktif' : 'Nonaktif' }}
+                  {{ user.isActive ? 'Aktif' : 'Off' }}
                 </span>
               </td>
-              <td class="py-3 px-4 text-right">
-                <div class="flex items-center justify-end space-x-2">
+              <td class="py-4 px-4 text-right whitespace-nowrap">
+                <div class="flex items-center justify-end space-x-1">
                   <button
                     @click="openModal(user)"
-                    class="p-2 text-blue-600 hover:bg-blue-100 rounded-lg"
-                    title="Edit"
+                    class="p-2 text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
                   >
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                     </svg>
                   </button>
                   <button
                     @click="toggleUserStatus(user)"
                     :class="[
-                      'p-2 rounded-lg',
-                      user.isActive ? 'text-red-600 hover:bg-red-100' : 'text-green-600 hover:bg-green-100'
+                      'p-2 rounded-lg transition-colors',
+                      user.isActive ? 'text-red-500 hover:bg-red-50' : 'text-emerald-600 hover:bg-emerald-50'
                     ]"
-                    :title="user.isActive ? 'Nonaktifkan' : 'Aktifkan'"
                   >
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="user.isActive ? 'M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636' : 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z'" />
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path v-if="user.isActive" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
+                      <path v-else stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                   </button>
                 </div>

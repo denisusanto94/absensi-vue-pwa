@@ -152,30 +152,34 @@ let html5QrCode = null
 
 const startScanning = async () => {
   error.value = null
+  isScanning.value = true
   
-  try {
-    html5QrCode = new Html5Qrcode('qr-reader')
-    
-    await html5QrCode.start(
-      { facingMode: 'environment' },
-      {
-        fps: 10,
-        qrbox: { width: 250, height: 250 }
-      },
-      (decodedText) => {
-        emit('scan-success', decodedText)
-        stopScanning()
-        closeModal()
-      },
-      () => {}
-    )
-    
-    isScanning.value = true
-  } catch (err) {
-    console.error('QR Scanner error:', err)
-    error.value = err.message || 'Gagal mengakses kamera'
-    emit('scan-error', err)
-  }
+  // Tunggu render selesai agar elemen #qr-reader terlihat
+  setTimeout(async () => {
+    try {
+      html5QrCode = new Html5Qrcode('qr-reader')
+      
+      await html5QrCode.start(
+        { facingMode: 'environment' },
+        {
+          fps: 10,
+          qrbox: { width: 250, height: 250 },
+          aspectRatio: 1.0
+        },
+        (decodedText) => {
+          emit('scan-success', decodedText)
+          stopScanning()
+          closeModal()
+        },
+        () => {}
+      )
+    } catch (err) {
+      console.error('QR Scanner error:', err)
+      isScanning.value = false
+      error.value = err.message || 'Gagal mengakses kamera'
+      emit('scan-error', err)
+    }
+  }, 100)
 }
 
 const stopScanning = async () => {
