@@ -203,11 +203,24 @@
       </div>
 
       <!-- Footer -->
-      <div class="mt-16 text-center">
-        <router-link to="/login" class="text-slate-500 hover:text-indigo-400 text-sm transition-colors decoration-indigo-500/30 hover:underline underline-offset-4">
-          Buka Panel Admin
-        </router-link>
-        <p class="text-slate-600 text-xs mt-6 tracking-widest uppercase">Digital Attendance v2.0</p>
+      <div class="mt-16 text-center space-y-6">
+        <button 
+          v-if="deferredPrompt"
+          @click="installApp"
+          class="inline-flex items-center px-6 py-3 bg-indigo-500 text-white rounded-2xl font-bold shadow-lg shadow-indigo-500/30 hover:bg-indigo-400 transition-all hover:-translate-y-0.5"
+        >
+          <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+          </svg>
+          Tambahkan ke Home Screen
+        </button>
+
+        <div>
+          <router-link to="/login" class="text-slate-500 hover:text-indigo-400 text-sm transition-colors decoration-indigo-500/30 hover:underline underline-offset-4">
+            Buka Panel Admin
+          </router-link>
+          <p class="text-slate-600 text-xs mt-6 tracking-widest uppercase">Digital Attendance v2.0</p>
+        </div>
       </div>
     </div>
 
@@ -244,6 +257,7 @@ const showScanner = ref(false)
 const submitting = ref(false)
 const submitError = ref('')
 const submitSuccess = ref('')
+const deferredPrompt = ref(null)
 
 let timeInterval = null
 
@@ -382,6 +396,22 @@ const handleQRError = (err) => {
   submitError.value = 'Kamera tidak dapat diakses'
 }
 
+const installApp = async () => {
+  if (!deferredPrompt.value) return
+  
+  deferredPrompt.value.prompt()
+  const { outcome } = await deferredPrompt.value.userChoice
+  
+  if (outcome === 'accepted') {
+    deferredPrompt.value = null
+  }
+}
+
+const handleBeforeInstallPrompt = (e) => {
+  e.preventDefault()
+  deferredPrompt.value = e
+}
+
 onMounted(async () => {
   const users = await usersDB.find({ selector: { isActive: true } })
   allUsers.value = users.docs.filter(u => u.role !== 'admin')
@@ -389,10 +419,13 @@ onMounted(async () => {
   updateTime()
   timeInterval = setInterval(updateTime, 1000)
   fetchLocation()
+
+  window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt)
 })
 
 onUnmounted(() => {
   if (timeInterval) clearInterval(timeInterval)
+  window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt)
 })
 
 watch(selectedUser, (newVal) => {
