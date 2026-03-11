@@ -98,7 +98,6 @@ const CalendarIcon = {
 
 const menuItems = [
   { path: '/user/dashboard', label: 'Dashboard', icon: DashboardIcon },
-  { path: '/user/scan-absen', label: 'Scan Absen', icon: ScanIcon },
   { path: '/user/pengajuan-cuti', label: 'Pengajuan Cuti', icon: CalendarIcon }
 ]
 

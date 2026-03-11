@@ -116,9 +116,7 @@ const menuItems = [
   { path: '/admin/approval-cuti', label: 'Approval Cuti', icon: ApprovalIcon }
 ]
 
-const userMenuItems = [
-  { path: '/user/scan-absen', label: 'Scan Absen', icon: ScanIcon }
-]
+const userMenuItems = []
 
 const isActive = (path) => {
   return route.path === path

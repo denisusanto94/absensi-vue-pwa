@@ -4,7 +4,8 @@ import { getSession } from '@/api/auth'
 const routes = [
   {
     path: '/',
-    redirect: '/login'
+    name: 'PublicAbsensi',
+    component: () => import('@/views/PublicAbsensi.vue')
   },
   {
     path: '/login',
@@ -25,11 +26,6 @@ const routes = [
         path: 'dashboard',
         name: 'UserDashboard',
         component: () => import('@/views/user/Dashboard.vue')
-      },
-      {
-        path: 'scan-absen',
-        name: 'ScanAbsen',
-        component: () => import('@/views/user/ScanAbsen.vue')
       },
       {
         path: 'pengajuan-cuti',

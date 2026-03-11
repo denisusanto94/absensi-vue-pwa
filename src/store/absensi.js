@@ -25,13 +25,15 @@ export const useAbsensiStore = defineStore('absensi', () => {
     return new Date().toISOString().split('T')[0]
   }
   
-  const checkIn = async (location, qrData = null) => {
+  const checkIn = async (location, qrData = null, publicUserId = null) => {
     loading.value = true
     error.value = null
     
     try {
       const today = getTodayDate()
-      const userId = userStore.userId
+      const userId = publicUserId || userStore.userId
+      
+      if (!userId) throw new Error('User ID tidak valid')
       
       let existingRecord = null
       try {
@@ -80,13 +82,15 @@ export const useAbsensiStore = defineStore('absensi', () => {
     }
   }
   
-  const checkOut = async (location, qrData = null) => {
+  const checkOut = async (location, qrData = null, publicUserId = null) => {
     loading.value = true
     error.value = null
     
     try {
       const today = getTodayDate()
-      const userId = userStore.userId
+      const userId = publicUserId || userStore.userId
+      
+      if (!userId) throw new Error('User ID tidak valid')
       
       let existingRecord = null
       try {
@@ -128,9 +132,9 @@ export const useAbsensiStore = defineStore('absensi', () => {
     }
   }
   
-  const fetchTodayAttendance = async () => {
+  const fetchTodayAttendance = async (publicUserId = null) => {
     const today = getTodayDate()
-    const userId = userStore.userId
+    const userId = publicUserId || userStore.userId
     
     if (!userId) return
     
