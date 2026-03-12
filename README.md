@@ -1,84 +1,73 @@
 Aplikasi ini terintergrasi dengan system absensi dengan Absensi Amazfit Bip 6 "dengan repository https://github.com/denisusanto94/zepapp-absensi-qrcode"
 
-# Sistem Absensi PWA (v2.2)
+# Sistem Absensi PWA (v2.3)
 
 Aplikasi Absensi QR Code berbasis Progressive Web App (PWA) dengan Vue.js 3, dirancang untuk efisiensi dan akurasi tinggi menggunakan teknologi offline-first dan validasi lokasi real-time.
 
-## Fitur Unggulan (Baru di v2.2)
+## Fitur Unggulan (Baru di v2.3)
 
-- **2FA Google Authenticator**: Peningkatan keamanan login dengan Otentikasi Dua Faktor (TOTP). Pengguna diwajibkan melakukan scan QR Code pada aplikasi Google Authenticator saat pertama kali login.
-- **Email Recovery (Nodemailer Proxy)**: Fitur "Lupa QR Code" yang mengirimkan ulang kode QR autentikasi langsung ke email pengguna. Dilengkapi dengan **Local Mail Proxy** di server Vite guna menghindari kendala koneksi CDN/SMTP eksternal.
-- **CID Image Compatibility**: Pengiriman gambar QR Code di email menggunakan metode *inline attachment* (CID) sehingga gambar muncul dengan sempurna di berbagai klien email (Gmail, Outlook, dll).
-- **Global Toast System**: Notifikasi *real-time* dengan desain modern di bagian atas-tengah layar untuk memberitahukan status pengiriman email, login, dan aksi lainnya.
-- **Smart QR Scanner**: Mendukung scan langsung melalui kamera atau unggah gambar dari galeri.
-- **Advanced Image Cropper**: Fitur *crop*, *rotate*, dan *flip* untuk memudahkan pembacaan QR Code dari gambar yang diunggah.
-- **OpenStreetMap Integration**: Deteksi lokasi otomatis yang akurat (Provinsi, Kota, Kecamatan, Kelurahan, Kode Pos).
-- **Keamanan Perangkat**: Melacak `Device ID` unik dan `Timestamp` presisi untuk setiap rekaman absensi.
+- **Unified Verification Box**: Peningkatan alur absensi di mana hasil scan kamera maupun unggahan gambar dari galeri sama-sama akan menampilkan **Confirmation Box** terlebih dahulu. Pengguna dapat memverifikasi data QR dan lokasi OSM sebelum data disimpan.
+- **Hash Mode Routing**: Menggunakan `createWebHashHistory` untuk menjamin stabilitas navigasi di server produksi tanpa memerlukan konfigurasi khusus pada *web server* (mencegah error 404 saat refresh).
+- **Admin 2FA Bypass**: Fitur khusus bagi administrator untuk masuk ke sistem tanpa token 2FA dalam keadaan darurat atau untuk akses cepat.
+- **2FA Google Authenticator**: Keamanan login menggunakan TOTP (Otentikasi Dua Faktor).
+- **Email Recovery (Nodemailer Proxy)**: Fitur kirim ulang QR Code ke email dengan dukungan **Local Mail Proxy** dan **CID Images** agar gambar QR muncul sempurna di inbox (Gmail/Outlook).
+- **Global Toast System**: Notifikasi status aksi (sukses/gagal) yang elegan di bagian atas-tengah layar.
+- **Advanced Image Cropper**: Mendukung prapemrosesan gambar QR dari galeri untuk tingkat pembacaan (*parsing*) yang lebih akurat.
+- **OpenStreetMap Integration**: Deteksi lokasi otomatis (Provinsi, Kota, Kecamatan, Kelurahan, Kode Pos).
 
 ## Fitur Utama
 
 - **Login Multi-role**: Akses berbeda untuk Admin dan User/Karyawan.
-- **Offline-First**: Data tersimpan di IndexedDB (Dexie.js).
-- **Manajemen Absensi**: Rekap data lengkap dengan detail wilayah dan koordinat GPS.
-- **Manajemen Karyawan**: Admin dapat memberikan hak akses "Authenticator" kepada karyawan tertentu.
-- **Instalasi PWA**: Dapat diinstal di Android, iOS, atau Desktop tanpa melalui App Store.
+- **Offline-First**: Sinkronisasi data otomatis via IndexedDB (Dexie.js).
+- **Manajemen Absensi**: Rekap data lengkap dengan metadata perangkat (`Device ID` & `User Agent`).
+- **Instalasi PWA**: Mendukung instalasi sebagai aplikasi mandiri di Android/iOS/Desktop.
 
 ## Tech Stack
 
 - **Frontend**: Vue.js 3 (Composition API)
-- **Build Tool**: Vite (with custom Email Proxy Plugin)
+- **Build Tool**: Vite
+- **Router**: Vue Router 4 (Hash Mode)
 - **State Management**: Pinia
-- **Styling**: Tailwind CSS
-- **Database**: IndexedDB (via Dexie.js)
-- **2FA Library**: otpauth & qrcode
-- **Email Delivery**: Nodemailer (via Local Server Proxy) & SmtpJS (Fallback)
+- **Database**: IndexedDB (Dexie.js)
+- **Email Delivery**: Nodemailer & SmtpJS
 - **QR Scanner**: html5-qrcode
-- **Image Editor**: Cropper.js
+- **Location Service**: OpenStreetMap / Nominatim API
 
-## Instalasi
+## Instalasi & Deployment
 
 ```bash
-# Clone repository
+# Clone & Install
 git clone https://github.com/denisusanto94/absensi-vue-pwa.git
-cd absensi-vue-pwa
-
-# Install dependencies
 npm install
 
-# Jalankan development server (Wajib untuk fitur Email Proxy)
+# Jalankan development server
 npm run dev
 
 # Build untuk production
 npm run build
 ```
 
+**Catatan Produksi**: Hasil build di dalam folder `dist` sudah menyertakan file `.htaccess` untuk kompatibilitas server Apache.
+
 ## Kredensial Default
 
-Saat pertama kali dijalankan, sistem akan membuat akun admin default:
+Saat pertama kali dijalankan, sistem membuat akun admin default:
 
 - **Email**: denisusanto94@gmail.com
 - **Password**: admin123
 
-> ⚠️ **Catatan 2FA**: Setelah memasukkan password, Anda akan diminta melakukan scan QR Code menggunakan aplikasi Google Authenticator.
+> ⚠️ **Catatan 2FA**: Admin memiliki opsi tombol khusus untuk **Login Langsung Tanpa 2FA** pada layar autentikasi tahap kedua.
 
 ## Audit & Database Schema
 
 ### Tabel Users
-- `_id`, `email`, `role`, `name`, `department`, `isActive`, `is_authenticator`, `otp_secret`, `createdAt`.
+- `_id`, `email`, `role`, `name`, `department`, `isActive`, `is_authenticator`, `otp_secret`.
 
 ### Tabel Attendance
 - **Identitas**: `userId`, `userName`
 - **Waktu**: `date`, `checkInTime`, `checkOutTime`, `timestamp`
 - **Lokasi**: `latitude`, `longitude`, `provinsi`, `kota`, `kecamatan`, `kelurahan`, `kode_pos`
 - **Perangkat**: `deviceid`, `userAgent`
-
-## Browser Support
-
-Aplikasi ini berjalan optimal pada browser modern yang mendukung Geolocation API, Service Workers, dan Crypto API:
-- Google Chrome (Desktop & Mobile)
-- Safari (iOS 12+)
-- Mozilla Firefox
-- Microsoft Edge
 
 ## License
 

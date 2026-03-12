@@ -398,10 +398,9 @@ const startScanning = async () => {
           qrbox: { width: 250, height: 250 },
           aspectRatio: 1.0
         },
-        (decodedText) => {
-          emit('scan-success', decodedText)
-          stopScanning()
-          closeModal()
+        async (decodedText) => {
+          await stopScanning()
+          startVerification(decodedText)
         },
         () => {}
       )

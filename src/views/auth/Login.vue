@@ -188,6 +188,17 @@
           >
             Verifikasi & Masuk
           </button>
+
+          <button
+            v-if="tempUser?.role === 'admin'"
+            @click="handleAdminBypass"
+            class="mt-4 w-full py-3 bg-white/5 border border-white/20 text-white/50 hover:text-white hover:bg-white/10 rounded-2xl text-xs font-semibold transition-all flex items-center justify-center space-x-2"
+          >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+            </svg>
+            <span>Sebagai Admin Login Langsung Tanpa 2fa</span>
+          </button>
         </div>
 
         <!-- Verification Mode (Already has is_authenticator) -->
@@ -222,6 +233,17 @@
             class="text-sm text-white/50 hover:text-white underline block mx-auto"
           >
             Lupa QR Code? Kirim ke Email Anda
+          </button>
+
+          <button
+            v-if="tempUser?.role === 'admin'"
+            @click="handleAdminBypass"
+            class="mt-4 w-full py-3 bg-white/5 border border-white/20 text-white/50 hover:text-white hover:bg-white/10 rounded-2xl text-xs font-semibold transition-all flex items-center justify-center space-x-2"
+          >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+            </svg>
+            <span>Sebagai Admin Login Langsung Tanpa 2fa</span>
           </button>
         </div>
       </div>
@@ -346,6 +368,21 @@ const handleForgotPassword = async () => {
     }
   } catch (err) {
     loginError.value = 'Gagal memproses permintaan.'
+  } finally {
+    loading.value = false
+  }
+}
+
+const handleAdminBypass = async () => {
+  if (tempUser.value?.role !== 'admin') return
+  
+  loading.value = true
+  try {
+    await userStore.completeLogin(tempUser.value)
+    toast.showToast('Login Admin Berhasil (Bypass 2FA)', 'success')
+    router.push('/admin/dashboard')
+  } catch (err) {
+    toast.showToast('Gagal memproses login admin', 'error')
   } finally {
     loading.value = false
   }
