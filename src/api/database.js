@@ -3,7 +3,7 @@ import Dexie from 'dexie'
 const db = new Dexie('AbsensiDB')
 
 db.version(1).stores({
-  users: '_id, email, role, name, department, isActive, createdAt',
+  users: '_id, email, role, name, department, isActive, is_authenticator, otp_secret, createdAt',
   attendance: '_id, userId, date, type, createdAt, latitude, longitude, alamat_lengkap, provinsi, kota, kecamatan, kelurahan, kode_pos, deviceid, timestamp',
   leaveRequests: '_id, userId, status, type, startDate, endDate, createdAt'
 })

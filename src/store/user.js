@@ -23,9 +23,8 @@ export const useUserStore = defineStore('user', () => {
       const result = await authLogin(email, password)
       
       if (result.success) {
-        session.value = result.user
-        await fetchUserProfile()
-        return { success: true }
+        // Return user for 2FA verification step
+        return { success: true, user: result.user }
       } else {
         error.value = result.error
         return { success: false, error: result.error }
@@ -36,6 +35,13 @@ export const useUserStore = defineStore('user', () => {
     } finally {
       loading.value = false
     }
+  }
+
+  const completeLogin = async (user) => {
+    const { createSession } = await import('@/api/auth')
+    session.value = createSession(user)
+    await fetchUserProfile()
+    return { success: true }
   }
   
   const logout = () => {
@@ -99,6 +105,7 @@ export const useUserStore = defineStore('user', () => {
     userRole,
     userId,
     login,
+    completeLogin,
     logout,
     fetchUserProfile,
     updateProfile,

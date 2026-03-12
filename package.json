@@ -12,7 +12,9 @@
     "cropperjs": "^1.6.2",
     "dexie": "^4.3.0",
     "html5-qrcode": "^2.3.8",
+    "otpauth": "^9.5.0",
     "pinia": "^3.0.4",
+    "qrcode": "^1.5.4",
     "vue": "^3.5.25",
     "vue-router": "^5.0.3"
   },

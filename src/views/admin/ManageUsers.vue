@@ -50,6 +50,7 @@
               <th class="hidden md:table-cell text-left py-3 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Email</th>
               <th class="hidden lg:table-cell text-left py-3 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Departemen</th>
               <th class="text-left py-3 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Role</th>
+              <th class="text-left py-3 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Authenticator</th>
               <th class="hidden sm:table-cell text-left py-3 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
               <th class="text-right py-3 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Aksi</th>
             </tr>
@@ -83,6 +84,16 @@
                   ]"
                 >
                   {{ user.role }}
+                </span>
+              </td>
+              <td class="py-4 px-4">
+                <span
+                  :class="[
+                    'px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider',
+                    user.is_authenticator ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-100 text-gray-600'
+                  ]"
+                >
+                  {{ user.is_authenticator ? 'Ya' : 'Tidak' }}
                 </span>
               </td>
               <td class="hidden sm:table-cell py-4 px-4">
@@ -183,6 +194,19 @@
                   <option value="admin">Admin</option>
                 </select>
               </div>
+
+              <div class="flex items-center space-x-3 p-4 bg-slate-50 rounded-2xl border border-slate-100 transition-all hover:bg-slate-100 group">
+                <div class="relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-primary-600 focus:ring-offset-2"
+                  :class="form.is_authenticator ? 'bg-primary-600' : 'bg-gray-200'"
+                  @click="form.is_authenticator = !form.is_authenticator">
+                  <span class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"
+                    :class="form.is_authenticator ? 'translate-x-5' : 'translate-x-0'"></span>
+                </div>
+                <div>
+                  <label class="text-sm font-semibold text-slate-900 leading-none">Jadikan Authenticator</label>
+                  <p class="text-[10px] text-slate-500 mt-1">User ini dapat memberikan persetujuan absensi</p>
+                </div>
+              </div>
               
               <div v-if="submitError" class="p-3 bg-red-50 border border-red-200 rounded-lg">
                 <p class="text-sm text-red-600">{{ submitError }}</p>
@@ -226,7 +250,8 @@ const form = reactive({
   password: '',
   department: '',
   phone: '',
-  role: 'user'
+  role: 'user',
+  is_authenticator: false
 })
 
 const filteredUsers = computed(() => {
@@ -273,6 +298,7 @@ const openModal = (user = null) => {
     form.department = user.department || ''
     form.phone = user.phone || ''
     form.role = user.role
+    form.is_authenticator = !!user.is_authenticator
   } else {
     form.name = ''
     form.email = ''
@@ -280,6 +306,7 @@ const openModal = (user = null) => {
     form.department = ''
     form.phone = ''
     form.role = 'user'
+    form.is_authenticator = false
   }
   
   showModal.value = true
@@ -302,6 +329,7 @@ const handleSubmit = async () => {
       doc.department = form.department
       doc.phone = form.phone
       doc.role = form.role
+      doc.is_authenticator = form.is_authenticator
       doc.updatedAt = new Date().toISOString()
       
       await usersDB.put(doc)
@@ -318,7 +346,8 @@ const handleSubmit = async () => {
         password: form.password,
         department: form.department,
         phone: form.phone,
-        role: form.role
+        role: form.role,
+        is_authenticator: form.is_authenticator
       })
       
       if (!result.success) {

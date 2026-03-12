@@ -12,7 +12,20 @@
     
     <div class="w-full max-w-md relative z-10">
       <!-- Back Button -->
+      <button
+        v-if="step === '2fa'"
+        @click="backToLogin"
+        class="inline-flex items-center space-x-2 text-white/70 hover:text-white transition-colors mb-6 group"
+      >
+        <div class="p-2 bg-white/10 rounded-xl group-hover:bg-white/20 transition-all">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+          </svg>
+        </div>
+        <span class="font-medium">Kembali ke Login</span>
+      </button>
       <router-link
+        v-else
         to="/"
         class="inline-flex items-center space-x-2 text-white/70 hover:text-white transition-colors mb-6 group"
       >
@@ -37,11 +50,11 @@
         <h1 class="text-4xl font-bold text-white tracking-tight">
           Sistem Absensi
         </h1>
-        <p class="text-white/70 mt-3 text-lg">Masuk ke akun Anda</p>
+        <p class="text-white/70 mt-3 text-lg">{{ step === 'login' ? 'Masuk ke akun Anda' : 'Otentikasi Dua Faktor' }}</p>
       </div>
       
       <!-- Login Card -->
-      <div class="backdrop-blur-xl bg-white/10 rounded-3xl shadow-2xl p-8 border border-white/20">
+      <div v-if="step === 'login'" class="backdrop-blur-xl bg-white/10 rounded-3xl shadow-2xl p-8 border border-white/20">
         <form @submit.prevent="handleLogin" class="space-y-6">
           <!-- Email Field -->
           <div class="space-y-2">
@@ -107,91 +120,115 @@
               {{ errors.password }}
             </p>
           </div>
-          
-          <!-- Remember Me & Forgot Password -->
-          <div class="flex items-center justify-between">
-            <label class="flex items-center cursor-pointer group">
-              <input
-                v-model="rememberMe"
-                type="checkbox"
-                class="w-5 h-5 rounded-lg border-2 border-white/30 bg-white/10 text-indigo-500 focus:ring-2 focus:ring-white/50 focus:ring-offset-0 cursor-pointer"
-              />
-              <span class="ml-3 text-sm text-white/70 group-hover:text-white transition-colors">Ingat saya</span>
-            </label>
-            <button type="button" class="text-sm text-white/70 hover:text-white transition-colors hover:underline">
-              Lupa password?
-            </button>
-          </div>
-          
-          <!-- Error Message -->
-          <transition
-            enter-active-class="transition ease-out duration-300"
-            enter-from-class="opacity-0 transform -translate-y-2"
-            enter-to-class="opacity-100 transform translate-y-0"
-            leave-active-class="transition ease-in duration-200"
-            leave-from-class="opacity-100"
-            leave-to-class="opacity-0"
-          >
-            <div v-if="loginError" class="p-4 bg-red-500/20 backdrop-blur border border-red-400/30 rounded-2xl">
-              <div class="flex items-center">
-                <svg class="w-5 h-5 text-red-300 mr-3" fill="currentColor" viewBox="0 0 20 20">
-                  <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
-                </svg>
-                <p class="text-red-200 text-sm">{{ loginError }}</p>
-              </div>
+
+          <!-- Login Error -->
+          <transition name="fade">
+            <div v-if="loginError" class="p-4 bg-red-500/20 backdrop-blur border border-red-400/30 rounded-2xl flex items-center">
+              <svg class="w-5 h-5 text-red-300 mr-3" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+              </svg>
+              <p class="text-red-200 text-sm">{{ loginError }}</p>
             </div>
           </transition>
           
-          <!-- Submit Button -->
           <button
             type="submit"
             :disabled="loading"
-            class="w-full py-4 px-6 bg-white text-indigo-600 font-semibold rounded-2xl shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-white/50 disabled:opacity-70 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center space-x-2"
+            class="w-full py-4 px-6 bg-white text-indigo-600 font-semibold rounded-2xl shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-300 flex items-center justify-center space-x-2"
           >
             <svg v-if="loading" class="animate-spin h-5 w-5 text-indigo-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
               <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
               <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
             </svg>
             <span>{{ loading ? 'Memproses...' : 'Masuk' }}</span>
-            <svg v-if="!loading" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
-            </svg>
           </button>
         </form>
-        
-        <!-- Divider -->
+
         <div class="relative my-8">
-          <div class="absolute inset-0 flex items-center">
-            <div class="w-full border-t border-white/20"></div>
-          </div>
-          <div class="relative flex justify-center text-sm">
-            <span class="px-4 bg-transparent text-white/50">Demo Akun</span>
+          <div class="absolute inset-0 flex items-center"><div class="w-full border-t border-white/20"></div></div>
+          <div class="relative flex justify-center text-sm"><span class="px-4 bg-transparent text-white/50">Demo Akun</span></div>
+        </div>
+        <div class="bg-white/5 rounded-2xl p-4 border border-white/10">
+          <div class="flex items-center justify-between text-white font-mono text-sm">
+            <div><p class="text-white/50 text-[10px] uppercase mb-1">Email</p>denisusanto94@gmail.com</div>
+            <div class="text-right"><p class="text-white/50 text-[10px] uppercase mb-1">Pass</p>admin123</div>
           </div>
         </div>
-        
-        <!-- Demo Credentials -->
-        <div class="bg-white/5 rounded-2xl p-4 border border-white/10">
-          <div class="flex items-center justify-between">
-            <div>
-              <p class="text-white/50 text-xs uppercase tracking-wider mb-1">Email</p>
-              <p class="text-white font-mono text-sm">denisusanto94@gmail.com</p>
+      </div>
+
+      <!-- 2FA Card -->
+      <div v-else class="backdrop-blur-xl bg-white/10 rounded-3xl shadow-2xl p-8 border border-white/20">
+        <!-- Setup Mode (No is_authenticator) -->
+        <div v-if="!tempUser.is_authenticator" class="text-center space-y-6">
+          <div class="p-4 bg-white/5 rounded-2xl border border-white/10">
+            <p class="text-white/90 font-medium mb-4">Scan QR Code di Google Authenticator</p>
+            <div class="bg-white p-4 rounded-xl inline-block shadow-inner">
+              <img :src="qrCodeUrl" alt="2FA QR Code" class="w-48 h-48 mx-auto" />
             </div>
-            <div class="text-right">
-              <p class="text-white/50 text-xs uppercase tracking-wider mb-1">Password</p>
-              <p class="text-white font-mono text-sm">admin123</p>
-            </div>
+            <p class="text-white/50 text-xs mt-4">Belum punya aplikasi? Download di PlayStore/AppStore</p>
           </div>
+          
+          <div class="space-y-2">
+            <label class="block text-sm font-medium text-white/90 text-left">Masukkan Token 6-Digit</label>
+            <input
+              v-model="otpToken"
+              type="text"
+              maxlength="6"
+              placeholder="000000"
+              class="w-full px-4 py-4 bg-white/10 border border-white/20 rounded-2xl text-white text-center text-2xl font-bold tracking-[0.5em] focus:outline-none focus:ring-2 focus:ring-white/50"
+            />
+          </div>
+
+          <div v-if="loginError" class="text-red-300 text-sm">{{ loginError }}</div>
+
+          <button
+            @click="handleVerify2FA"
+            :disabled="otpToken.length < 6 || loading"
+            class="w-full py-4 bg-white text-indigo-600 font-bold rounded-2xl shadow-lg hover:shadow-xl transition-all disabled:opacity-50"
+          >
+            Verifikasi & Masuk
+          </button>
+        </div>
+
+        <!-- Verification Mode (Already has is_authenticator) -->
+        <div v-else class="text-center space-y-6">
+          <div class="w-16 h-16 bg-white/10 rounded-full flex items-center justify-center mx-auto border border-white/20">
+            <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+            </svg>
+          </div>
+          <p class="text-white/90">Masukkan 6-digit token dari aplikasi Google Authenticator Anda.</p>
+          
+          <input
+            v-model="otpToken"
+            type="text"
+            maxlength="6"
+            placeholder="000000"
+            class="w-full px-4 py-4 bg-white/10 border border-white/20 rounded-2xl text-white text-center text-2xl font-bold tracking-[0.5em] focus:outline-none focus:ring-2 focus:ring-white/50"
+          />
+
+          <div v-if="loginError" class="text-red-300 text-sm">{{ loginError }}</div>
+
+          <button
+            @click="handleVerify2FA"
+            :disabled="otpToken.length < 6 || loading"
+            class="w-full py-4 bg-indigo-500 text-white font-bold rounded-2xl hover:bg-indigo-600 transition-all disabled:opacity-50"
+          >
+            Verifikasi Token
+          </button>
+
+          <button
+            @click="handleForgotPassword"
+            class="text-sm text-white/50 hover:text-white underline block mx-auto"
+          >
+            Lupa QR Code? Kirim ke Email Anda
+          </button>
         </div>
       </div>
       
       <!-- Footer -->
       <div class="text-center mt-8">
-        <p class="text-white/50 text-sm">
-          &copy; {{ currentYear }} Sistem Absensi PWA
-        </p>
-        <p class="text-white/30 text-xs mt-2">
-          Powered by Vue.js & Dexie.js
-        </p>
+        <p class="text-white/50 text-sm">&copy; {{ currentYear }} Sistem Absensi PWA</p>
       </div>
     </div>
   </div>
@@ -201,72 +238,110 @@
 import { ref, reactive, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '@/store/user'
+import { generateOTPSecret, generateOTPAuthUrl, generateQRCode, verifyOTPToken } from '@/utils/twoFactor'
+import { send2FAEmail } from '@/utils/email'
+import { usersDB } from '@/api/database'
 
 const router = useRouter()
 const userStore = useUserStore()
 
-const form = reactive({
-  email: '',
-  password: ''
-})
-
-const errors = reactive({
-  email: '',
-  password: ''
-})
-
-const showPassword = ref(false)
+const step = ref('login') // 'login', '2fa'
+const tempUser = ref(null)
+const otpToken = ref('')
+const qrCodeUrl = ref('')
 const loading = ref(false)
 const loginError = ref('')
-const rememberMe = ref(false)
 
+const form = reactive({ email: '', password: '' })
+const errors = reactive({ email: '', password: '' })
+const showPassword = ref(false)
 const currentYear = computed(() => new Date().getFullYear())
 
-const validateForm = () => {
-  let isValid = true
-  errors.email = ''
-  errors.password = ''
-  
-  if (!form.email) {
-    errors.email = 'Email wajib diisi'
-    isValid = false
-  } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) {
-    errors.email = 'Format email tidak valid'
-    isValid = false
-  }
-  
-  if (!form.password) {
-    errors.password = 'Password wajib diisi'
-    isValid = false
-  } else if (form.password.length < 6) {
-    errors.password = 'Password minimal 6 karakter'
-    isValid = false
-  }
-  
-  return isValid
+const backToLogin = () => {
+  step.value = 'login'
+  tempUser.value = null
+  otpToken.value = ''
+  loginError.value = ''
 }
 
 const handleLogin = async () => {
   loginError.value = ''
-  
-  if (!validateForm()) return
-  
   loading.value = true
   
   try {
     const result = await userStore.login(form.email, form.password)
-    
     if (result.success) {
+      tempUser.value = result.user
+      step.value = '2fa'
+      
+      // If setup is needed (not yet authenticator)
+      if (!tempUser.value.is_authenticator) {
+        if (!tempUser.value.otp_secret) {
+          tempUser.value.otp_secret = generateOTPSecret()
+        }
+        const authUrl = generateOTPAuthUrl(tempUser.value.email, tempUser.value.otp_secret)
+        qrCodeUrl.value = await generateQRCode(authUrl)
+      }
+    } else {
+      loginError.value = result.error
+    }
+  } catch (error) {
+    loginError.value = 'Terjadi kesalahan sistem.'
+  } finally {
+    loading.value = false
+  }
+}
+
+const handleVerify2FA = async () => {
+  loginError.value = ''
+  loading.value = true
+  
+  try {
+    const isValid = verifyOTPToken(otpToken.value, tempUser.value.otp_secret)
+    if (isValid) {
+      // If it was the first setup, update user records
+      if (!tempUser.value.is_authenticator) {
+        const userDoc = await usersDB.get(tempUser.value._id)
+        userDoc.is_authenticator = true
+        userDoc.otp_secret = tempUser.value.otp_secret
+        userDoc.updatedAt = new Date().toISOString()
+        await usersDB.put(userDoc)
+        tempUser.value.is_authenticator = true
+      }
+      
+      // Finish login
+      await userStore.completeLogin(tempUser.value)
       if (userStore.isAdmin) {
         router.push('/admin/dashboard')
       } else {
         router.push('/user/dashboard')
       }
     } else {
-      loginError.value = result.error
+      loginError.value = 'Token tidak valid'
     }
   } catch (error) {
-    loginError.value = 'Terjadi kesalahan. Silakan coba lagi.'
+    loginError.value = 'Verifikasi gagal.'
+  } finally {
+    loading.value = false
+  }
+}
+
+const handleForgotPassword = async () => {
+  loading.value = true
+  loginError.value = ''
+  
+  try {
+    const authUrl = generateOTPAuthUrl(tempUser.value.email, tempUser.value.otp_secret)
+    const code = await generateQRCode(authUrl)
+    const res = await send2FAEmail(tempUser.value.email, code)
+    
+    if (res.success) {
+      alert('QR Code telah dikirim ke email Anda. Silakan cek inbox/spam.')
+    } else {
+      loginError.value = 'Gagal mengirim email: ' + res.error
+    }
+  } catch (err) {
+    loginError.value = 'Gagal memproses permintaan.'
   } finally {
     loading.value = false
   }
@@ -274,65 +349,14 @@ const handleLogin = async () => {
 </script>
 
 <style scoped>
-@keyframes float {
-  0%, 100% {
-    transform: translateY(0) rotate(0deg);
-  }
-  50% {
-    transform: translateY(-20px) rotate(5deg);
-  }
-}
-
-@keyframes float-delayed {
-  0%, 100% {
-    transform: translateY(0) rotate(0deg);
-  }
-  50% {
-    transform: translateY(-30px) rotate(-5deg);
-  }
-}
-
-@keyframes float-slow {
-  0%, 100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-15px);
-  }
-}
-
-@keyframes bounce-slow {
-  0%, 100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-10px);
-  }
-}
-
-.animate-float {
-  animation: float 8s ease-in-out infinite;
-}
-
-.animate-float-delayed {
-  animation: float-delayed 10s ease-in-out infinite;
-  animation-delay: 1s;
-}
-
-.animate-float-slow {
-  animation: float-slow 12s ease-in-out infinite;
-  animation-delay: 2s;
-}
-
-.animate-bounce-slow {
-  animation: bounce-slow 3s ease-in-out infinite;
-}
-
-input:-webkit-autofill,
-input:-webkit-autofill:hover,
-input:-webkit-autofill:focus {
-  -webkit-text-fill-color: white;
-  -webkit-box-shadow: 0 0 0px 1000px rgba(255, 255, 255, 0.1) inset;
-  transition: background-color 5000s ease-in-out 0s;
-}
+@keyframes float { 0%, 100% { transform: translateY(0) rotate(0deg); } 50% { transform: translateY(-20px) rotate(5deg); } }
+@keyframes float-delayed { 0%, 100% { transform: translateY(0) rotate(0deg); } 50% { transform: translateY(-30px) rotate(-5deg); } }
+@keyframes float-slow { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-15px); } }
+@keyframes bounce-slow { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+.animate-float { animation: float 8s ease-in-out infinite; }
+.animate-float-delayed { animation: float-delayed 10s ease-in-out infinite; animation-delay: 1s; }
+.animate-float-slow { animation: float-slow 12s ease-in-out infinite; animation-delay: 2s; }
+.animate-bounce-slow { animation: bounce-slow 3s ease-in-out infinite; }
+.fade-enter-active, .fade-leave-active { transition: opacity 0.3s; }
+.fade-enter-from, .fade-leave-to { opacity: 0; }
 </style>

@@ -1,4 +1,5 @@
 import { usersDB } from './database'
+import { generateOTPSecret } from '@/utils/twoFactor'
 
 const SESSION_KEY = 'absensi_session'
 
@@ -31,20 +32,37 @@ export const login = async (email, password) => {
       throw new Error('Akun tidak aktif. Hubungi admin.')
     }
     
-    const session = {
-      userId: user._id,
-      email: user.email,
-      name: user.name,
-      role: user.role,
-      loginAt: new Date().toISOString()
+    // Check 2FA requirement
+    // If user is admin OR has is_authenticator=true, they MUST do 2FA
+    // Note: If is_authenticator is false, they will need to SETUP 2FA
+    
+    return { 
+      success: true, 
+      user: {
+        _id: user._id,
+        email: user.email,
+        name: user.name,
+        role: user.role,
+        is_authenticator: !!user.is_authenticator,
+        otp_secret: user.otp_secret
+      }
     }
-    
-    localStorage.setItem(SESSION_KEY, JSON.stringify(session))
-    
-    return { success: true, user: session }
   } catch (error) {
     return { success: false, error: error.message }
   }
+}
+
+export const createSession = (user) => {
+  const session = {
+    userId: user._id,
+    email: user.email,
+    name: user.name,
+    role: user.role,
+    loginAt: new Date().toISOString()
+  }
+  
+  localStorage.setItem(SESSION_KEY, JSON.stringify(session))
+  return session
 }
 
 export const logout = () => {
@@ -96,6 +114,7 @@ export const register = async (userData) => {
       department: userData.department || '',
       phone: userData.phone || '',
       isActive: true,
+      is_authenticator: false,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     }
@@ -118,6 +137,11 @@ export const initDefaultAdmin = async () => {
     if (oldAdmin.docs.length > 0) {
       const doc = oldAdmin.docs[0]
       doc.email = 'denisusanto94@gmail.com'
+      doc.is_authenticator = true
+      // Generate secret if not exists
+      if (!doc.otp_secret) {
+        doc.otp_secret = generateOTPSecret()
+      }
       doc.updatedAt = new Date().toISOString()
       await usersDB.put(doc)
       console.log('Migrated old admin to: denisusanto94@gmail.com')
@@ -142,6 +166,8 @@ export const initDefaultAdmin = async () => {
         department: 'IT',
         phone: '',
         isActive: true,
+        is_authenticator: true,
+        otp_secret: generateOTPSecret(),
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString()
       }
