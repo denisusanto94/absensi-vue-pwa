@@ -73,6 +73,41 @@ export const getGoogleMapsUrl = (latitude, longitude) => {
   return `https://www.google.com/maps?q=${latitude},${longitude}`
 }
 
+export const getAddressFromCoords = async (latitude, longitude) => {
+  try {
+    const response = await fetch(
+      `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&zoom=18&addressdetails=1`,
+      {
+        headers: {
+          'Accept-Language': 'id',
+          'User-Agent': 'AbsensiPWA/1.0'
+        }
+      }
+    )
+    const data = await response.json()
+    const addr = data.address || {}
+    
+    return {
+      alamat_lengkap: data.display_name || '',
+      kota: addr.city || addr.town || addr.village || '',
+      kecamatan: addr.suburb || addr.district || '',
+      kelurahan: addr.neighbourhood || addr.village || '',
+      kabupaten: addr.city_district || addr.county || '',
+      kode_pos: addr.postcode || ''
+    }
+  } catch (err) {
+    console.error('Reverse geocoding error:', err)
+    return {
+      alamat_lengkap: 'Gagal mendeteksi alamat',
+      kota: '',
+      kecamatan: '',
+      kelurahan: '',
+      kabupaten: '',
+      kode_pos: ''
+    }
+  }
+}
+
 export const watchLocation = (callback, errorCallback) => {
   if (!navigator.geolocation) {
     errorCallback(new Error('Geolocation tidak didukung'))

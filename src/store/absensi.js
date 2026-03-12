@@ -2,6 +2,7 @@ import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { attendanceDB, leaveRequestsDB } from '@/api/database'
 import { useUserStore } from './user'
+import { getAddressFromCoords } from '@/utils/location'
 
 export const useAbsensiStore = defineStore('absensi', () => {
   const attendanceRecords = ref([])
@@ -53,15 +54,28 @@ export const useAbsensiStore = defineStore('absensi', () => {
         type: 'regular'
       }
       
+      const addressDetails = await getAddressFromCoords(location.latitude, location.longitude)
+      
       record.checkIn = {
         time: new Date().toISOString(),
         location: {
           latitude: location.latitude,
-          longitude: location.longitude
+          longitude: location.longitude,
+          ...addressDetails
         },
         qrData,
         device: navigator.userAgent
       }
+      
+      // Flatten searchable fields for indexing convenience
+      record.latitude = location.latitude
+      record.longitude = location.longitude
+      record.alamat_lengkap = addressDetails.alamat_lengkap
+      record.kota = addressDetails.kota
+      record.kecamatan = addressDetails.kecamatan
+      record.kelurahan = addressDetails.kelurahan
+      record.kabupaten = addressDetails.kabupaten
+      record.kode_pos = addressDetails.kode_pos
       record.updatedAt = new Date().toISOString()
       
       if (!existingRecord) {
@@ -107,11 +121,14 @@ export const useAbsensiStore = defineStore('absensi', () => {
         throw new Error('Anda sudah melakukan check-out hari ini')
       }
       
+      const addressDetails = await getAddressFromCoords(location.latitude, location.longitude)
+
       existingRecord.checkOut = {
         time: new Date().toISOString(),
         location: {
           latitude: location.latitude,
-          longitude: location.longitude
+          longitude: location.longitude,
+          ...addressDetails
         },
         qrData,
         device: navigator.userAgent

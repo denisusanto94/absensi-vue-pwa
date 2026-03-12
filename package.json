@@ -9,6 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "cropperjs": "^1.6.2",
     "dexie": "^4.3.0",
     "html5-qrcode": "^2.3.8",
     "pinia": "^3.0.4",

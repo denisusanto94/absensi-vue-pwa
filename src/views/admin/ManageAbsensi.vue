@@ -73,7 +73,14 @@
               <th class="py-3 px-4">Tanggal</th>
               <th class="py-3 px-4">Check In</th>
               <th class="py-3 px-4">Check Out</th>
-              <th class="py-3 px-4">Status</th>
+              <th class="py-3 px-4 text-center">Latitude</th>
+              <th class="py-3 px-4 text-center">Longitude</th>
+              <th class="py-3 px-4">Alamat</th>
+              <th class="py-3 px-4">Kota/Kab</th>
+              <th class="py-3 px-4">Kecamatan</th>
+              <th class="py-3 px-4">Kelurahan</th>
+              <th class="py-3 px-4 text-center">Kode Pos</th>
+              <th class="py-3 px-4 text-center">Status</th>
               <th class="py-3 px-4 text-right">Aksi</th>
             </tr>
           </thead>
@@ -105,7 +112,30 @@
               <td class="py-4 px-4">
                 <p class="text-xs font-bold text-slate-900">{{ formatTime(record.checkOut?.time) || '-' }}</p>
               </td>
-              <td class="py-4 px-4">
+              <td class="py-4 px-4 whitespace-nowrap text-center">
+                <p class="text-[10px] text-slate-500 font-mono">{{ record.checkIn?.location?.latitude?.toFixed(6) || '-' }}</p>
+              </td>
+              <td class="py-4 px-4 whitespace-nowrap text-center">
+                <p class="text-[10px] text-slate-500 font-mono">{{ record.checkIn?.location?.longitude?.toFixed(6) || '-' }}</p>
+              </td>
+              <td class="py-4 px-4 min-w-[200px]">
+                <p class="text-[10px] text-slate-600 leading-tight line-clamp-2" :title="record.checkIn?.location?.alamat_lengkap">
+                  {{ record.checkIn?.location?.alamat_lengkap || '-' }}
+                </p>
+              </td>
+              <td class="py-4 px-4 whitespace-nowrap">
+                <p class="text-[10px] text-slate-600">{{ record.checkIn?.location?.kota || record.checkIn?.location?.kabupaten || '-' }}</p>
+              </td>
+              <td class="py-4 px-4 whitespace-nowrap">
+                <p class="text-[10px] text-slate-600">{{ record.checkIn?.location?.kecamatan || '-' }}</p>
+              </td>
+              <td class="py-4 px-4 whitespace-nowrap">
+                <p class="text-[10px] text-slate-600">{{ record.checkIn?.location?.kelurahan || '-' }}</p>
+              </td>
+              <td class="py-4 px-4 whitespace-nowrap text-center">
+                <p class="text-[10px] text-slate-600">{{ record.checkIn?.location?.kode_pos || '-' }}</p>
+              </td>
+              <td class="py-4 px-4 text-center">
                 <span
                   :class="[
                     'px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-tighter',
