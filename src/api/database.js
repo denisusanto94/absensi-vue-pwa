@@ -48,6 +48,11 @@ export const usersDB = {
     }
   },
   
+  async remove(doc) {
+    await db.users.delete(doc._id)
+    return { ok: true }
+  },
+  
   async createIndex() {
     return { ok: true }
   }
@@ -100,6 +105,11 @@ export const attendanceDB = {
     return { docs: results }
   },
   
+  async remove(doc) {
+    await db.attendance.delete(doc._id)
+    return { ok: true }
+  },
+  
   async createIndex() {
     return { ok: true }
   }
@@ -138,6 +148,11 @@ export const leaveRequestsDB = {
     }
     
     return { docs: results }
+  },
+  
+  async remove(doc) {
+    await db.leaveRequests.delete(doc._id)
+    return { ok: true }
   },
   
   async createIndex() {

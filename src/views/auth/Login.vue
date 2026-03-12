@@ -11,6 +11,19 @@
     </div>
     
     <div class="w-full max-w-md relative z-10">
+      <!-- Back Button -->
+      <router-link
+        to="/"
+        class="inline-flex items-center space-x-2 text-white/70 hover:text-white transition-colors mb-6 group"
+      >
+        <div class="p-2 bg-white/10 rounded-xl group-hover:bg-white/20 transition-all">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+          </svg>
+        </div>
+        <span class="font-medium">Kembali ke Absensi</span>
+      </router-link>
+
       <!-- Logo & Header -->
       <div class="text-center mb-8">
         <div class="relative inline-block">

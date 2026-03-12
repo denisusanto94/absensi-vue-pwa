@@ -158,44 +158,53 @@
               </div>
 
               <div class="grid grid-cols-2 gap-4">
-                <button
-                  @click="handleCheckIn"
-                  :disabled="submitting || hasCheckedIn || !location"
-                  class="relative group overflow-hidden py-4 rounded-3xl font-bold transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                  :class="hasCheckedIn ? 'bg-slate-800 text-slate-500' : 'bg-emerald-600 text-white hover:bg-emerald-500 shadow-xl shadow-emerald-600/20'"
+                <!-- Check In Indicator -->
+                <div
+                  class="relative py-4 rounded-3xl font-bold transition-all flex items-center justify-center border-2"
+                  :class="(!hasCheckedIn) 
+                    ? 'bg-emerald-500/10 border-emerald-500/50 text-emerald-400' 
+                    : 'bg-slate-800/50 border-slate-700 text-slate-500'"
                 >
-                  <span class="relative z-10 flex items-center justify-center">
-                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
-                    </svg>
-                    Check In
-                  </span>
-                </button>
+                  <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
+                  </svg>
+                  Check In
+                </div>
 
-                <button
-                  @click="handleCheckOut"
-                  :disabled="submitting || !hasCheckedIn || hasCheckedOut || !location"
-                  class="relative group overflow-hidden py-4 rounded-3xl font-bold transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                  :class="!hasCheckedIn || hasCheckedOut ? 'bg-slate-800 text-slate-500' : 'bg-red-600 text-white hover:bg-red-500 shadow-xl shadow-red-600/20'"
+                <!-- Check Out Indicator -->
+                <div
+                  class="relative py-4 rounded-3xl font-bold transition-all flex items-center justify-center border-2"
+                  :class="(hasCheckedIn && !hasCheckedOut) 
+                    ? 'bg-red-500/10 border-red-500/50 text-red-400' 
+                    : 'bg-slate-800/50 border-slate-700 text-slate-500'"
                 >
-                  <span class="relative z-10 flex items-center justify-center">
-                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                    </svg>
-                    Check Out
-                  </span>
-                </button>
+                  <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                  </svg>
+                  Check Out
+                </div>
               </div>
 
+              <!-- Main Scan Action -->
               <button
                 @click="showScanner = true"
-                :disabled="hasCheckedOut"
-                class="w-full py-4 bg-indigo-600/20 border border-indigo-500/30 rounded-3xl text-indigo-300 font-bold hover:bg-indigo-600/30 transition-all flex items-center justify-center group"
+                :disabled="hasCheckedOut || !location"
+                class="w-full py-5 rounded-3xl font-bold transition-all flex items-center justify-center group"
+                :class="hasCheckedOut || !location
+                  ? 'bg-slate-800 text-slate-500 border-slate-700 cursor-not-allowed opacity-50' 
+                  : 'bg-indigo-600 border-indigo-400 text-white hover:bg-indigo-500 shadow-2xl shadow-indigo-600/30 animate-pulse-gentle'"
               >
-                <svg class="w-5 h-5 mr-2 transform group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
-                </svg>
-                Scan QR Presensi
+                <div class="flex items-center space-x-3">
+                  <div class="p-2 bg-white/20 rounded-xl">
+                    <svg class="w-6 h-6 transform group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
+                    </svg>
+                  </div>
+                  <div class="text-left">
+                    <p class="text-xs opacity-70 uppercase tracking-widest font-bold">Wajib Scan QR</p>
+                    <p class="text-lg">Scan Presensi Sekarang</p>
+                  </div>
+                </div>
               </button>
             </div>
           </div>
@@ -451,6 +460,15 @@ watch(selectedUser, (newVal) => {
 ::-webkit-scrollbar-track {
   background: transparent;
 }
+@keyframes pulse-gentle {
+  0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(79, 70, 229, 0.4); }
+  50% { transform: scale(1.02); box-shadow: 0 0 20px 10px rgba(79, 70, 229, 0); }
+}
+
+.animate-pulse-gentle {
+  animation: pulse-gentle 2s ease-in-out infinite;
+}
+
 ::-webkit-scrollbar-thumb {
   background: #334155;
   border-radius: 10px;

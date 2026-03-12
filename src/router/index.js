@@ -62,6 +62,11 @@ const routes = [
         path: 'approval-cuti',
         name: 'ApprovalCuti',
         component: () => import('@/views/admin/ApprovalCuti.vue')
+      },
+      {
+        path: 'manage-absensi',
+        name: 'ManageAbsensi',
+        component: () => import('@/views/admin/ManageAbsensi.vue')
       }
     ]
   },

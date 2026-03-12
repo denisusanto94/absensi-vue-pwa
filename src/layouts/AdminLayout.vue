@@ -127,6 +127,7 @@ const ScanIcon = {
 const menuItems = [
   { path: '/admin/dashboard', label: 'Dashboard', icon: DashboardIcon },
   { path: '/admin/manage-users', label: 'Kelola Karyawan', icon: UsersIcon },
+  { path: '/admin/manage-absensi', label: 'Management Absensi', icon: ScanIcon },
   { path: '/admin/rekap-absensi', label: 'Rekap Absensi', icon: ChartIcon },
   { path: '/admin/approval-cuti', label: 'Approval Cuti', icon: ApprovalIcon }
 ]

@@ -297,6 +297,34 @@ export const useAbsensiStore = defineStore('absensi', () => {
       loading.value = false
     }
   }
+
+  const updateAttendance = async (record) => {
+    loading.value = true
+    try {
+      record.updatedAt = new Date().toISOString()
+      await attendanceDB.put(record)
+      return { success: true }
+    } catch (err) {
+      error.value = err.message
+      return { success: false, error: err.message }
+    } finally {
+      loading.value = false
+    }
+  }
+
+  const deleteAttendance = async (recordId) => {
+    loading.value = true
+    try {
+      const doc = await attendanceDB.get(recordId)
+      await attendanceDB.remove(doc)
+      return { success: true }
+    } catch (err) {
+      error.value = err.message
+      return { success: false, error: err.message }
+    } finally {
+      loading.value = false
+    }
+  }
   
   const addToPendingSync = (docId) => {
     if (!pendingSync.value.includes(docId)) {
@@ -335,6 +363,8 @@ export const useAbsensiStore = defineStore('absensi', () => {
     fetchLeaveRequests,
     fetchAllLeaveRequests,
     updateLeaveRequestStatus,
+    updateAttendance,
+    deleteAttendance,
     loadPendingSync,
     clearPendingSync
   }
