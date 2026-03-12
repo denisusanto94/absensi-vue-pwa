@@ -79,7 +79,69 @@ export default defineConfig({
         enabled: true,
         type: 'module'
       }
-    })
+    }),
+    {
+      name: 'email-proxy',
+      configureServer(server) {
+        server.middlewares.use(async (req, res, next) => {
+          if (req.url.startsWith('/api/send-email') && req.method === 'POST') {
+            console.log('\x1b[36m%s\x1b[0m', 'Email Proxy received request...');
+            let body = '';
+            req.on('data', chunk => { body += chunk; });
+            req.on('end', async () => {
+              try {
+                const data = JSON.parse(body);
+                const nodemailer = await import('nodemailer');
+                
+                const transporter = nodemailer.default.createTransport({
+                  service: 'gmail',
+                  auth: {
+                    user: 'tognw.deni@gmail.com',
+                    pass: 'mklw decl pokx dbib'
+                  }
+                });
+
+                // Setup attachments if QRCodeData is present
+                const attachments = [];
+                if (data.QRCodeData) {
+                  attachments.push({
+                    filename: 'qrcode.png',
+                    content: data.QRCodeData.split("base64,")[1],
+                    encoding: 'base64',
+                    cid: '2fa-qr-code' // Same as used in HTML: cid:2fa-qr-code
+                  });
+                }
+
+                await transporter.sendMail({
+                  from: '"Sistem Absensi PWA" <tognw.deni@gmail.com>',
+                  to: data.To,
+                  subject: data.Subject,
+                  html: data.Body,
+                  attachments: attachments
+                });
+
+                res.setHeader('Content-Type', 'application/json');
+                res.end(JSON.stringify({ success: true }));
+                console.log('\x1b[32m%s\x1b[0m', 'Email sent successfully with CID attachment!');
+              } catch (error) {
+                console.error('Email Proxy Logic Error:', error);
+                res.statusCode = 500;
+                res.setHeader('Content-Type', 'application/json');
+                res.end(JSON.stringify({ success: false, error: 'Internal Server Error' }));
+              }
+            });
+            
+            req.on('error', (err) => {
+              console.error('Request stream error:', err);
+              res.statusCode = 500;
+              res.end();
+            });
+          } else {
+            next();
+          }
+        });
+      }
+    }
   ],
   resolve: {
     alias: {

@@ -238,12 +238,14 @@
 import { ref, reactive, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '@/store/user'
+import { useToastStore } from '@/store/toast'
 import { generateOTPSecret, generateOTPAuthUrl, generateQRCode, verifyOTPToken } from '@/utils/twoFactor'
 import { send2FAEmail } from '@/utils/email'
 import { usersDB } from '@/api/database'
 
 const router = useRouter()
 const userStore = useUserStore()
+const toast = useToastStore()
 
 const step = ref('login') // 'login', '2fa'
 const tempUser = ref(null)
@@ -311,6 +313,7 @@ const handleVerify2FA = async () => {
       
       // Finish login
       await userStore.completeLogin(tempUser.value)
+      toast.showToast('Login berhasil! Selamat datang.', 'success')
       if (userStore.isAdmin) {
         router.push('/admin/dashboard')
       } else {
@@ -336,9 +339,10 @@ const handleForgotPassword = async () => {
     const res = await send2FAEmail(tempUser.value.email, code)
     
     if (res.success) {
-      alert('QR Code telah dikirim ke email Anda. Silakan cek inbox/spam.')
+      toast.showToast('QR Code telah dikirim ke email Anda!', 'success')
     } else {
       loginError.value = 'Gagal mengirim email: ' + res.error
+      toast.showToast('Gagal mengirim email', 'error')
     }
   } catch (err) {
     loginError.value = 'Gagal memproses permintaan.'
