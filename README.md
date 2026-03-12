@@ -61,6 +61,15 @@ src/
 └── views/              # Halaman Utama & Dashboard Admin
 ```
 
+## Kredensial Default
+
+Saat pertama kali dijalankan, sistem akan membuat atau memperbarui akun admin default:
+
+- **Email**: denisusanto94@gmail.com
+- **Password**: admin123
+
+> ⚠️ Segera ganti password setelah login pertama kali!
+
 ## Audit & Database Schema
 
 Setiap rekaman absensi menyimpan data berikut:

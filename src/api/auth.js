@@ -110,14 +110,32 @@ export const register = async (userData) => {
 
 export const initDefaultAdmin = async () => {
   try {
+    // Check for old default admin to migrate
+    const oldAdmin = await usersDB.find({
+      selector: { email: 'admin@absensi.com' }
+    })
+
+    if (oldAdmin.docs.length > 0) {
+      const doc = oldAdmin.docs[0]
+      doc.email = 'denisusanto94@gmail.com'
+      doc.updatedAt = new Date().toISOString()
+      await usersDB.put(doc)
+      console.log('Migrated old admin to: denisusanto94@gmail.com')
+    }
+
     const admins = await usersDB.find({
       selector: { role: 'admin' }
     })
     
-    if (admins.docs.length === 0) {
+    // Also check if our specific new email exists as admin
+    const newAdminCheck = await usersDB.find({
+      selector: { email: 'denisusanto94@gmail.com' }
+    })
+    
+    if (admins.docs.length === 0 && newAdminCheck.docs.length === 0) {
       const defaultAdmin = {
         _id: 'user_admin_default',
-        email: 'admin@absensi.com',
+        email: 'denisusanto94@gmail.com',
         password: await hashPassword('admin123'),
         name: 'Administrator',
         role: 'admin',
@@ -129,7 +147,7 @@ export const initDefaultAdmin = async () => {
       }
       
       await usersDB.put(defaultAdmin)
-      console.log('Default admin created: admin@absensi.com / admin123')
+      console.log('Default admin created: denisusanto94@gmail.com / admin123')
     }
   } catch (error) {
     console.error('Error initializing default admin:', error)

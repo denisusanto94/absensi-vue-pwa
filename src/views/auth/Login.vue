@@ -174,7 +174,7 @@
           <div class="flex items-center justify-between">
             <div>
               <p class="text-white/50 text-xs uppercase tracking-wider mb-1">Email</p>
-              <p class="text-white font-mono text-sm">admin@absensi.com</p>
+              <p class="text-white font-mono text-sm">denisusanto94@gmail.com</p>
             </div>
             <div class="text-right">
               <p class="text-white/50 text-xs uppercase tracking-wider mb-1">Password</p>
