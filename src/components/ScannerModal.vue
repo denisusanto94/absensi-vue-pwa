@@ -16,7 +16,7 @@
           <div
             class="fixed inset-0 bg-black bg-opacity-50 transition-opacity"
             @click="closeModal"
-          />
+          ></div>
           
           <transition
             enter-active-class="transition ease-out duration-300"
@@ -45,8 +45,9 @@
               </div>
               
               <div class="relative">
+                <!-- Idle State -->
                 <div
-                  v-if="!isScanning && !error"
+                  v-if="!isScanning && !error && !isCropping && !isVerifying"
                   class="aspect-square bg-gray-100 rounded-xl flex items-center justify-center"
                 >
                   <div class="text-center">
@@ -57,8 +58,9 @@
                   </div>
                 </div>
                 
+                <!-- Error State -->
                 <div
-                  v-if="error"
+                  v-if="error && !isCropping && !isVerifying"
                   class="aspect-square bg-red-50 rounded-xl flex items-center justify-center"
                 >
                   <div class="text-center p-4">
@@ -69,11 +71,12 @@
                   </div>
                 </div>
                 
+                <!-- Live Scan State -->
                 <div
                   id="qr-reader"
                   :class="{ 'hidden': !isScanning }"
                   class="aspect-square rounded-xl overflow-hidden"
-                />
+                ></div>
                 
                 <div
                   v-if="isScanning"
@@ -81,21 +84,119 @@
                 >
                   <div class="absolute inset-0 flex items-center justify-center">
                     <div class="w-48 h-48 border-2 border-primary-500 rounded-lg relative">
-                      <div class="absolute top-0 left-0 w-4 h-4 border-t-4 border-l-4 border-primary-500 rounded-tl" />
-                      <div class="absolute top-0 right-0 w-4 h-4 border-t-4 border-r-4 border-primary-500 rounded-tr" />
-                      <div class="absolute bottom-0 left-0 w-4 h-4 border-b-4 border-l-4 border-primary-500 rounded-bl" />
-                      <div class="absolute bottom-0 right-0 w-4 h-4 border-b-4 border-r-4 border-primary-500 rounded-br" />
+                      <div class="absolute top-0 left-0 w-4 h-4 border-t-4 border-l-4 border-primary-500 rounded-tl"></div>
+                      <div class="absolute top-0 right-0 w-4 h-4 border-t-4 border-r-4 border-primary-500 rounded-tr"></div>
+                      <div class="absolute bottom-0 left-0 w-4 h-4 border-b-4 border-l-4 border-primary-500 rounded-bl"></div>
+                      <div class="absolute bottom-0 right-0 w-4 h-4 border-b-4 border-r-4 border-primary-500 rounded-br"></div>
                     </div>
                   </div>
                 </div>
 
                 <!-- Cropper Interface -->
-                <div v-if="isCropping" class="aspect-square bg-slate-900 rounded-xl overflow-hidden">
+                <div v-if="isCropping && !isVerifying" class="aspect-square bg-slate-900 rounded-xl overflow-hidden">
                   <img ref="imageToCrop" :src="cropImageSrc" class="max-w-full block" />
+                </div>
+
+                <!-- Verification Interface -->
+                <div v-if="isVerifying" class="py-2 text-left">
+                  <div class="flex items-center space-x-3 mb-6 bg-emerald-50 p-4 rounded-2xl border border-emerald-100">
+                    <div class="w-10 h-10 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center shrink-0">
+                      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                    </div>
+                    <div>
+                      <h4 class="text-base font-bold text-slate-900 leading-tight">QR Berhasil Dibaca!</h4>
+                      <p class="text-[10px] text-slate-500 uppercase font-bold tracking-wider">Silakan konfirmasi data berikut</p>
+                    </div>
+                  </div>
+                  
+                  <!-- Info Section: QR Data -->
+                  <div class="mb-5">
+                    <p class="text-[10px] text-slate-400 uppercase font-bold tracking-widest mb-2 flex items-center">
+                      <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
+                      </svg>
+                      Informasi QR Code
+                    </p>
+                    <div class="bg-slate-50 rounded-2xl border border-slate-100 divide-y divide-slate-100 overflow-hidden">
+                      <template v-if="parsedQRData">
+                        <div v-for="item in parsedQRData" :key="item.key" class="px-4 py-2.5 flex justify-between items-start text-xs">
+                          <span class="text-slate-400 font-medium capitalize shrink-0 mr-4">{{ item.key.replace(/_/g, ' ') }}</span>
+                          <span class="text-slate-700 font-bold text-right break-all">{{ item.value }}</span>
+                        </div>
+                      </template>
+                      <div v-else class="px-4 py-3 text-xs font-mono text-slate-600 break-all leading-relaxed">
+                        {{ pendingQRData }}
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Info Section: Detected Location -->
+                  <div class="mb-8">
+                    <p class="text-[10px] text-slate-400 uppercase font-bold tracking-widest mb-2 flex items-center">
+                      <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                      </svg>
+                      Lokasi Presensi (GPS)
+                    </p>
+                    <div class="bg-slate-50 rounded-2xl border border-slate-100 overflow-hidden">
+                      <div v-if="loadingLocation" class="p-6 text-center">
+                        <div class="animate-spin w-5 h-5 border-2 border-primary-500 border-t-transparent rounded-full mx-auto mb-2"></div>
+                        <p class="text-[10px] text-slate-400 font-medium">Mendeteksi Alamat OSM...</p>
+                      </div>
+                      <div v-else-if="locationDetails" class="divide-y divide-slate-100">
+                        <div class="px-4 py-2.5 flex justify-between items-center text-xs">
+                          <span class="text-slate-400 font-medium shrink-0 mr-4">Provinsi</span>
+                          <span class="text-slate-700 font-bold text-right">{{ locationDetails.provinsi || '-' }}</span>
+                        </div>
+                        <div class="px-4 py-2.5 flex justify-between items-center text-xs">
+                          <span class="text-slate-400 font-medium shrink-0 mr-4">Kota</span>
+                          <span class="text-slate-700 font-bold text-right">{{ locationDetails.kota || '-' }}</span>
+                        </div>
+                        <div class="px-4 py-2.5 flex justify-between items-center text-xs">
+                          <span class="text-slate-400 font-medium shrink-0 mr-4">Kecamatan</span>
+                          <span class="text-slate-700 font-bold text-right">{{ locationDetails.kecamatan || '-' }}</span>
+                        </div>
+                        <div class="px-4 py-2.5 flex justify-between items-center text-xs">
+                          <span class="text-slate-400 font-medium shrink-0 mr-4">Kelurahan</span>
+                          <span class="text-slate-700 font-bold text-right">{{ locationDetails.kelurahan || '-' }}</span>
+                        </div>
+                        <div class="px-4 py-2.5 flex justify-between items-center text-xs">
+                          <span class="text-slate-400 font-medium shrink-0 mr-4">Kode Pos</span>
+                          <span class="text-slate-700 font-bold text-right">{{ locationDetails.kode_pos || '-' }}</span>
+                        </div>
+                      </div>
+                      <div v-else class="p-4 text-center text-[10px] text-red-500 font-medium">
+                        Gagal mendeteksi lokasi OSM. Pastikan GPS aktif.
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="flex space-x-3">
+                    <button
+                      @click="confirmScan"
+                      :disabled="loadingLocation"
+                      class="flex-1 py-3.5 bg-emerald-600 text-white font-bold rounded-2xl hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-emerald-600/20 transition-all flex items-center justify-center"
+                    >
+                      <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                      </svg>
+                      Lanjutkan Absensi
+                    </button>
+                    <button
+                      @click="isVerifying = false"
+                      class="py-3.5 px-6 bg-slate-100 text-slate-600 font-bold rounded-2xl hover:bg-slate-200 transition-colors"
+                    >
+                      Ulangi
+                    </button>
+                  </div>
                 </div>
               </div>
               
-              <div v-if="isCropping" class="mt-6">
+              <!-- Bottom Action Bar (Crops) -->
+              <div v-if="isCropping && !isVerifying" class="mt-6">
                 <div class="flex flex-wrap items-center justify-center gap-3 mb-6">
                   <button @click="cropper.rotate(-90)" class="p-2.5 bg-slate-100 hover:bg-slate-200 rounded-xl transition-colors" title="Putar Kiri">
                     <svg class="w-5 h-5 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -128,7 +229,7 @@
                 <div class="flex space-x-3">
                   <button
                     @click="executeCropAndScan"
-                    class="flex-1 btn-primary py-3 flex items-center justify-center font-bold"
+                    class="flex-1 py-3 bg-primary-600 text-white rounded-xl flex items-center justify-center font-bold hover:bg-primary-700 transition-colors"
                   >
                     <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
@@ -137,18 +238,19 @@
                   </button>
                   <button
                     @click="cancelCropping"
-                    class="btn-secondary py-3 px-6 font-bold"
+                    class="py-3 px-6 bg-slate-100 text-slate-600 rounded-xl font-bold hover:bg-slate-200 transition-colors"
                   >
                     Batal
                   </button>
                 </div>
               </div>
 
-              <div v-else class="mt-6 flex space-x-3">
+              <!-- Bottom Action Bar (Default) -->
+              <div v-else-if="!isVerifying" class="mt-6 flex space-x-3">
                 <button
                   v-if="!isScanning"
                   @click="startScanning"
-                  class="flex-1 btn-primary py-3"
+                  class="flex-1 py-3 bg-primary-600 text-white rounded-xl flex items-center justify-center font-bold hover:bg-primary-700 transition-colors"
                 >
                   <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
@@ -160,7 +262,7 @@
                 <button
                   v-else
                   @click="stopScanning"
-                  class="flex-1 btn-danger py-3"
+                  class="flex-1 py-3 bg-red-600 text-white rounded-xl flex items-center justify-center font-bold hover:bg-red-700 transition-colors"
                 >
                   <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -178,7 +280,7 @@
                   />
                   <button
                     @click="$refs.fileInput.click()"
-                    class="btn-secondary py-3 px-4 flex items-center"
+                    class="py-3 px-4 bg-slate-100 text-slate-600 rounded-xl flex items-center font-medium hover:bg-slate-200 transition-colors"
                     title="Scan dari Galeri"
                   >
                     <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -190,7 +292,7 @@
                 
                 <button
                   @click="closeModal"
-                  class="btn-secondary py-3 px-6"
+                  class="py-3 px-6 bg-slate-50 text-slate-400 rounded-xl font-bold hover:bg-slate-100 transition-colors"
                 >
                   Batal
                 </button>
@@ -204,10 +306,11 @@
 </template>
 
 <script setup>
-import { ref, watch, onUnmounted, nextTick } from 'vue'
+import { ref, watch, onUnmounted, nextTick, computed } from 'vue'
 import { Html5Qrcode } from 'html5-qrcode'
 import Cropper from 'cropperjs'
 import 'cropperjs/dist/cropper.css'
+import { getAddressFromCoords, getCurrentLocation } from '@/utils/location'
 
 const props = defineProps({
   modelValue: {
@@ -224,16 +327,64 @@ const emit = defineEmits(['update:modelValue', 'scan-success', 'scan-error'])
 
 const isScanning = ref(false)
 const isCropping = ref(false)
+const isVerifying = ref(false)
+const loadingLocation = ref(false)
+const pendingQRData = ref('')
+const locationDetails = ref(null)
 const cropImageSrc = ref('')
 const imageToCrop = ref(null)
 const error = ref(null)
 let html5QrCode = null
 let cropper = null
 
+const parsedQRData = computed(() => {
+  try {
+    const data = pendingQRData.value
+    if (data.startsWith('{') || data.startsWith('[')) {
+      const parsed = JSON.parse(data)
+      if (typeof parsed === 'object' && parsed !== null) {
+        return Object.entries(parsed).map(([key, value]) => ({ 
+          key, 
+          value: typeof value === 'object' ? JSON.stringify(value) : value 
+        }))
+      }
+    }
+  } catch (e) {
+    // Not valid JSON
+  }
+  return null
+})
+
+const startVerification = async (data) => {
+  pendingQRData.value = data
+  isVerifying.value = true
+  isScanning.value = false
+  isCropping.value = false
+  
+  loadingLocation.value = true
+  locationDetails.value = null
+  
+  try {
+    const pos = await getCurrentLocation()
+    const address = await getAddressFromCoords(pos.latitude, pos.longitude)
+    locationDetails.value = {
+      ...address,
+      latitude: pos.latitude,
+      longitude: pos.longitude
+    }
+  } catch (err) {
+    console.error('Verification location error:', err)
+  } finally {
+    loadingLocation.value = false
+  }
+}
+
 const startScanning = async () => {
   error.value = null
   isScanning.value = true
   isCropping.value = false
+  isVerifying.value = false
+  pendingQRData.value = ''
   
   // Tunggu render selesai agar elemen #qr-reader terlihat
   setTimeout(async () => {
@@ -284,9 +435,8 @@ const handleFileUpload = async (event) => {
   const quickScanner = new Html5Qrcode('qr-reader')
   try {
     const decodedText = await quickScanner.scanFile(file, false)
-    emit('scan-success', decodedText)
-    closeModal()
     quickScanner.clear()
+    await startVerification(decodedText)
     return
   } catch (err) {
     console.log('Quick scan failed, opening cropper...')
@@ -354,8 +504,7 @@ const executeCropAndScan = async () => {
     
     try {
       const decodedText = await tempScanner.scanFile(file, false)
-      emit('scan-success', decodedText)
-      closeModal()
+      await startVerification(decodedText)
     } catch (err) {
       console.error('File scan error:', err)
       error.value = 'QR Code tidak terdeteksi. Coba sisakan area putih sedikit di sekeliling kode QR saat memotong.'
@@ -374,6 +523,17 @@ const handleFlip = (type) => {
   } else {
     cropper.scaleY(data.scaleY === -1 ? 1 : -1)
   }
+}
+
+const confirmScan = () => {
+  emit('scan-success', pendingQRData.value, {
+    coords: {
+      latitude: locationDetails.value?.latitude,
+      longitude: locationDetails.value?.longitude
+    },
+    address: locationDetails.value
+  })
+  closeModal()
 }
 
 const cancelCropping = () => {

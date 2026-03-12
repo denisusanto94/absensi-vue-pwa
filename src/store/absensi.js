@@ -4,6 +4,15 @@ import { attendanceDB, leaveRequestsDB } from '@/api/database'
 import { useUserStore } from './user'
 import { getAddressFromCoords } from '@/utils/location'
 
+const getDeviceId = () => {
+  let deviceId = localStorage.getItem('absensi_device_id')
+  if (!deviceId) {
+    deviceId = 'dev_' + Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15)
+    localStorage.setItem('absensi_device_id', deviceId)
+  }
+  return deviceId
+}
+
 export const useAbsensiStore = defineStore('absensi', () => {
   const attendanceRecords = ref([])
   const leaveRequests = ref([])
@@ -26,7 +35,7 @@ export const useAbsensiStore = defineStore('absensi', () => {
     return new Date().toISOString().split('T')[0]
   }
   
-  const checkIn = async (location, qrData = null, publicUserId = null) => {
+  const checkIn = async (location, qrData = null, publicUserId = null, locationOverride = null) => {
     loading.value = true
     error.value = null
     
@@ -54,13 +63,14 @@ export const useAbsensiStore = defineStore('absensi', () => {
         type: 'regular'
       }
       
-      const addressDetails = await getAddressFromCoords(location.latitude, location.longitude)
+      const addressDetails = locationOverride?.address || await getAddressFromCoords(location.latitude, location.longitude)
+      const finalCoords = locationOverride?.coords || location
       
       record.checkIn = {
         time: new Date().toISOString(),
         location: {
-          latitude: location.latitude,
-          longitude: location.longitude,
+          latitude: finalCoords.latitude,
+          longitude: finalCoords.longitude,
           ...addressDetails
         },
         qrData,
@@ -68,14 +78,16 @@ export const useAbsensiStore = defineStore('absensi', () => {
       }
       
       // Flatten searchable fields for indexing convenience
-      record.latitude = location.latitude
-      record.longitude = location.longitude
+      record.latitude = finalCoords.latitude
+      record.longitude = finalCoords.longitude
       record.alamat_lengkap = addressDetails.alamat_lengkap
+      record.provinsi = addressDetails.provinsi
       record.kota = addressDetails.kota
       record.kecamatan = addressDetails.kecamatan
       record.kelurahan = addressDetails.kelurahan
-      record.kabupaten = addressDetails.kabupaten
       record.kode_pos = addressDetails.kode_pos
+      record.deviceid = getDeviceId()
+      record.timestamp = new Date().toISOString()
       record.updatedAt = new Date().toISOString()
       
       if (!existingRecord) {
@@ -96,7 +108,7 @@ export const useAbsensiStore = defineStore('absensi', () => {
     }
   }
   
-  const checkOut = async (location, qrData = null, publicUserId = null) => {
+  const checkOut = async (location, qrData = null, publicUserId = null, locationOverride = null) => {
     loading.value = true
     error.value = null
     
@@ -121,18 +133,31 @@ export const useAbsensiStore = defineStore('absensi', () => {
         throw new Error('Anda sudah melakukan check-out hari ini')
       }
       
-      const addressDetails = await getAddressFromCoords(location.latitude, location.longitude)
+      const addressDetails = locationOverride?.address || await getAddressFromCoords(location.latitude, location.longitude)
+      const finalCoords = locationOverride?.coords || location
 
       existingRecord.checkOut = {
         time: new Date().toISOString(),
         location: {
-          latitude: location.latitude,
-          longitude: location.longitude,
+          latitude: finalCoords.latitude,
+          longitude: finalCoords.longitude,
           ...addressDetails
         },
         qrData,
         device: navigator.userAgent
       }
+      
+      // Update flattened fields with latest scan
+      existingRecord.latitude = finalCoords.latitude
+      existingRecord.longitude = finalCoords.longitude
+      existingRecord.alamat_lengkap = addressDetails.alamat_lengkap
+      existingRecord.provinsi = addressDetails.provinsi
+      existingRecord.kota = addressDetails.kota
+      existingRecord.kecamatan = addressDetails.kecamatan
+      existingRecord.kelurahan = addressDetails.kelurahan
+      existingRecord.kode_pos = addressDetails.kode_pos
+      existingRecord.deviceid = getDeviceId()
+      existingRecord.timestamp = new Date().toISOString()
       existingRecord.updatedAt = new Date().toISOString()
       
       await attendanceDB.put(existingRecord)

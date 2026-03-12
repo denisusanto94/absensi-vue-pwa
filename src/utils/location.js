@@ -89,10 +89,10 @@ export const getAddressFromCoords = async (latitude, longitude) => {
     
     return {
       alamat_lengkap: data.display_name || '',
-      kota: addr.city || addr.town || addr.village || '',
+      provinsi: addr.state || '',
+      kota: addr.city || addr.town || addr.village || addr.city_district || addr.county || '',
       kecamatan: addr.suburb || addr.district || '',
       kelurahan: addr.neighbourhood || addr.village || '',
-      kabupaten: addr.city_district || addr.county || '',
       kode_pos: addr.postcode || ''
     }
   } catch (err) {

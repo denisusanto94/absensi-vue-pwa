@@ -76,11 +76,14 @@
               <th class="py-3 px-4 text-center">Latitude</th>
               <th class="py-3 px-4 text-center">Longitude</th>
               <th class="py-3 px-4">Alamat</th>
-              <th class="py-3 px-4">Kota/Kab</th>
+              <th class="py-3 px-4">Provinsi</th>
+              <th class="py-3 px-4">Kota</th>
               <th class="py-3 px-4">Kecamatan</th>
               <th class="py-3 px-4">Kelurahan</th>
-              <th class="py-3 px-4 text-center">Kode Pos</th>
-              <th class="py-3 px-4 text-center">Status</th>
+               <th class="py-3 px-4 text-center">Kode Pos</th>
+               <th class="py-3 px-4">Device ID</th>
+               <th class="py-3 px-4">Timestamp</th>
+               <th class="py-3 px-4 text-center">Status</th>
               <th class="py-3 px-4 text-right">Aksi</th>
             </tr>
           </thead>
@@ -124,7 +127,10 @@
                 </p>
               </td>
               <td class="py-4 px-4 whitespace-nowrap">
-                <p class="text-[10px] text-slate-600">{{ record.checkIn?.location?.kota || record.checkIn?.location?.kabupaten || '-' }}</p>
+                <p class="text-[10px] text-slate-600">{{ record.checkIn?.location?.provinsi || '-' }}</p>
+              </td>
+              <td class="py-4 px-4 whitespace-nowrap">
+                <p class="text-[10px] text-slate-600">{{ record.checkIn?.location?.kota || '-' }}</p>
               </td>
               <td class="py-4 px-4 whitespace-nowrap">
                 <p class="text-[10px] text-slate-600">{{ record.checkIn?.location?.kecamatan || '-' }}</p>
@@ -132,9 +138,15 @@
               <td class="py-4 px-4 whitespace-nowrap">
                 <p class="text-[10px] text-slate-600">{{ record.checkIn?.location?.kelurahan || '-' }}</p>
               </td>
-              <td class="py-4 px-4 whitespace-nowrap text-center">
-                <p class="text-[10px] text-slate-600">{{ record.checkIn?.location?.kode_pos || '-' }}</p>
-              </td>
+               <td class="py-4 px-4 whitespace-nowrap text-center">
+                 <p class="text-[10px] text-slate-600">{{ record.checkIn?.location?.kode_pos || '-' }}</p>
+               </td>
+               <td class="py-4 px-4 whitespace-nowrap">
+                 <p class="text-[10px] text-slate-400 font-mono">{{ record.deviceid || '-' }}</p>
+               </td>
+               <td class="py-4 px-4 whitespace-nowrap">
+                 <p class="text-[10px] text-slate-400 font-mono">{{ formatTimestamp(record.timestamp) }}</p>
+               </td>
               <td class="py-4 px-4 text-center">
                 <span
                   :class="[
@@ -308,6 +320,18 @@ const filteredAttendance = computed(() => {
            record.department?.toLowerCase().includes(query)
   })
 })
+
+const formatTimestamp = (ts) => {
+  if (!ts) return '-'
+  return new Date(ts).toLocaleString('id-ID', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit'
+  })
+}
 
 const getInitials = (name) => {
   if (!name) return '?'

@@ -258,8 +258,8 @@ const handleCheckOut = async () => {
   }
 }
 
-const handleQRScan = async (qrData) => {
-  if (!location.value) {
+const handleQRScan = async (qrData, locationOverride = null) => {
+  if (!location.value && !locationOverride) {
     submitError.value = 'Lokasi tidak tersedia'
     return
   }
@@ -271,12 +271,12 @@ const handleQRScan = async (qrData) => {
   try {
     let result
     if (!hasCheckedIn.value) {
-      result = await absensiStore.checkIn(location.value, qrData)
+      result = await absensiStore.checkIn(location.value, qrData, null, locationOverride)
       if (result.success) {
         submitSuccess.value = 'Check-in dengan QR berhasil!'
       }
     } else if (!hasCheckedOut.value) {
-      result = await absensiStore.checkOut(location.value, qrData)
+      result = await absensiStore.checkOut(location.value, qrData, null, locationOverride)
       if (result.success) {
         submitSuccess.value = 'Check-out dengan QR berhasil!'
       }

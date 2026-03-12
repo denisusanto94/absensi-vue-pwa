@@ -1,33 +1,43 @@
-# Sistem Absensi PWA
+Aplikasi ini terintergrasi dengan system absensi dengan Absensi Amazfit Bip 6 "dengan repository https://github.com/denisusanto94/zepapp-absensi-qrcode"
 
-Aplikasi Absensi QR Code berbasis Progressive Web App (PWA) dengan Vue.js 3, menggunakan PouchDB untuk fitur offline-first.
+# Sistem Absensi PWA (v2.0)
 
-## Fitur
+Aplikasi Absensi QR Code berbasis Progressive Web App (PWA) dengan Vue.js 3, dirancang untuk efisiensi dan akurasi tinggi menggunakan teknologi offline-first dan validasi lokasi real-time.
 
-- **Login Multi-role**: Admin dan User dengan akses berbeda
-- **Scan QR Code**: Absensi menggunakan QR Code scanner
-- **Offline-First**: Data tersimpan lokal dan sync otomatis saat online
-- **Geolokasi**: Validasi lokasi saat absensi
-- **Pengajuan Cuti**: Karyawan dapat mengajukan cuti
-- **Dashboard Admin**: Kelola karyawan, rekap absensi, approval cuti
-- **PWA**: Dapat diinstall seperti aplikasi native
+## Fitur Unggulan (Baru di v2.0)
+
+- **Smart QR Scanner**: Mendukung scan langsung melalui kamera atau unggah gambar dari galeri.
+- **Advanced Image Cropper**: Dilengkapi fitur *crop*, *rotate*, dan *flip* untuk memudahkan pembacaan QR Code dari gambar yang diunggah.
+- **Verification Box**: Dialog konfirmasi sebelum data disimpan, menampilkan hasil urai (*parse*) JSON dari QR Code.
+- **OpenStreetMap Integration**: Deteksi lokasi otomatis yang akurat (Provinsi, Kota, Kecamatan, Kelurahan, Kode Pos) menggunakan API Nominatim OSM.
+- **Keamanan Perangkat**: Melacak `Device ID` unik dan `Timestamp` presisi untuk setiap rekaman absensi guna mencegah kecurangan.
+- **UI/UX Premium**: Desain modern menggunakan Tailwind CSS dengan animasi halus dan *loading states* yang responsif.
+
+## Fitur Utama
+
+- **Login Multi-role**: Akses berbeda untuk Admin dan User/Karyawan.
+- **Offline-First**: Data tersimpan di IndexedDB (Dexie.js) dan sinkron otomatis saat kembali online.
+- **Manajemen Absensi**: Rekap data lengkap dengan detail wilayah dan koordinat GPS.
+- **Pengajuan Cuti**: Sistem pengajuan dan persetujuan cuti karyawan yang terintegrasi.
+- **Instalasi PWA**: Dapat diinstal di Android, iOS, atau Desktop tanpa melalui App Store.
 
 ## Tech Stack
 
-- Vue.js 3 (Composition API)
-- Vite (Build tool)
-- Pinia (State Management)
-- Vue Router (Navigation)
-- PouchDB (Offline Database)
-- Tailwind CSS (Styling)
-- html5-qrcode (QR Scanner)
-- Vite PWA Plugin
+- **Frontend**: Vue.js 3 (Composition API)
+- **Build Tool**: Vite
+- **State Management**: Pinia
+- **Styling**: Tailwind CSS
+- **Database**: IndexedDB (via Dexie.js / PouchDB)
+- **QR Scanner**: html5-qrcode
+- **Image Editor**: Cropper.js
+- **Location Service**: OpenStreetMap / Nominatim API
 
 ## Instalasi
 
 ```bash
-# Clone atau masuk ke direktori project
-cd absensi-pwa
+# Clone repository
+git clone https://github.com/denisusanto94/absensi-vue-pwa.git
+cd absensi-vue-pwa
 
 # Install dependencies
 npm install
@@ -37,109 +47,35 @@ npm run dev
 
 # Build untuk production
 npm run build
-
-# Preview build
-npm run preview
 ```
-
-## Konfigurasi
-
-### Environment Variables (.env)
-
-```env
-VITE_COUCHDB_URL=https://your-couchdb-server.com
-VITE_COUCHDB_USERNAME=admin
-VITE_COUCHDB_PASSWORD=password
-VITE_APP_NAME=Sistem Absensi PWA
-```
-
-### PWA Icons
-
-Generate icon PWA menggunakan tool seperti:
-- [PWA Asset Generator](https://github.com/nickvision-apps/pwagen)
-- [Real Favicon Generator](https://realfavicongenerator.net/)
-
-Ukuran yang diperlukan:
-- 72x72, 96x96, 128x128, 144x144, 152x152, 192x192, 384x384, 512x512
-
-Letakkan file PNG di folder `public/icons/` dengan nama:
-- icon-72x72.png
-- icon-96x96.png
-- dst...
-
-Juga tambahkan di root `public/`:
-- pwa-192x192.png
-- pwa-512x512.png
-- apple-touch-icon.png (180x180)
-- favicon.ico
 
 ## Struktur Folder
 
 ```
-absensi-pwa/
-├── public/
-│   ├── icons/              # Ikon PWA
-│   ├── favicon.ico
-│   └── manifest.webmanifest
-├── src/
-│   ├── assets/             # CSS Global
-│   ├── api/                # Database & Auth Service
-│   ├── components/         # Komponen Reusable
-│   ├── layouts/            # Layout Admin & User
-│   ├── views/              # Halaman
-│   ├── store/              # Pinia Stores
-│   ├── router/             # Vue Router
-│   ├── utils/              # Helper functions
-│   ├── App.vue
-│   └── main.js
-├── .env
-├── index.html
-├── tailwind.config.js
-├── vite.config.js
-└── package.json
+src/
+├── api/                # Konfigurasi Database (Dexie/PouchDB)
+├── components/         # Komponen UI (ScannerModal, BaseButton, dll)
+├── layouts/            # Layout Navigasi Admin & User
+├── store/              # State Absensi & User (Pinia)
+├── utils/              # Helper Location, Formatting & QR Logic
+└── views/              # Halaman Utama & Dashboard Admin
 ```
 
-## Kredensial Default
+## Audit & Database Schema
 
-Saat pertama kali dijalankan, sistem akan membuat akun admin default:
-
-- **Email**: admin@absensi.com
-- **Password**: admin123
-
-> ⚠️ Segera ganti password setelah login pertama kali!
-
-## Penggunaan
-
-### User (Karyawan)
-
-1. Login dengan akun yang sudah terdaftar
-2. Dashboard menampilkan status absensi hari ini
-3. Klik "Scan Absen" untuk check-in/check-out
-4. Izinkan akses lokasi saat diminta
-5. Ajukan cuti melalui menu "Pengajuan Cuti"
-
-### Admin
-
-1. Login dengan akun admin
-2. Dashboard menampilkan statistik keseluruhan
-3. Kelola karyawan di menu "Kelola Karyawan"
-4. Lihat rekap absensi dan export ke CSV
-5. Approve/reject pengajuan cuti
-
-## Sinkronisasi Data
-
-Aplikasi menggunakan PouchDB untuk menyimpan data secara lokal. Jika dikonfigurasi dengan CouchDB server:
-
-- Data akan sync otomatis saat online
-- Perubahan dari perangkat lain akan langsung terupdate
-- Absensi yang dilakukan offline akan tersimpan dan sync saat kembali online
+Setiap rekaman absensi menyimpan data berikut:
+- **Identitas**: `userId`, `userName`
+- **Waktu**: `date`, `checkInTime`, `checkOutTime`, `timestamp`
+- **Lokasi**: `latitude`, `longitude`, `provinsi`, `kota`, `kecamatan`, `kelurahan`, `kode_pos`
+- **Perangkat**: `deviceid`, `userAgent`
 
 ## Browser Support
 
-- Chrome 70+
-- Firefox 65+
-- Safari 12+
-- Edge 79+
+Aplikasi ini berjalan optimal pada browser modern yang mendukung Geolocation API dan Service Workers:
+- Google Chrome (Desktop & Mobile)
+- Safari (iOS 12+)
+- Mozilla Firefox
+- Microsoft Edge
 
 ## License
 
